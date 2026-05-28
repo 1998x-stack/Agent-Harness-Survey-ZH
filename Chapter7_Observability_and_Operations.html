@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第7章 可观测性与运维 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c1d: #0D9488;
+    --c2: #F59E0B; --c2d: #B45309;
+    --c3: #818CF8; --c3d: #4F46E5;
+    --c4: #F472B6; --c4d: #DB2777;
+    --c5: #34D399; --c5d: #059669;
+  }
+  .hero h1 em { background: linear-gradient(135deg, var(--c4), var(--c3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .layer-sec { scroll-margin-top: 60px; }
+
+  /* Stat highlights */
+  .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .sbox {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px; text-align: center; transition: all .2s;
+  }
+  .sbox:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .sb-val { font-size: 28px; font-weight: 800; line-height: 1.1; }
+  .sb-label { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* Managed agents */
+  .mg-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .mg-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; text-align: center; transition: all .2s;
+  }
+  .mg-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .mg-icon { font-size: 26px; margin-bottom: 6px; }
+  .mg-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mg-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .mg-code { margin-top: 8px; font-size: 10px; font-family: var(--mono); color: var(--faint); }
+
+  /* Detection layers */
+  .det-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+  .det-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; transition: border-color .2s;
+  }
+  .det-card:hover { border-color: var(--border2); }
+  .det-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-bottom: 6px; }
+  .det-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .det-target { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  .quote {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 20px; font-size: 14px; line-height: 1.8;
+  }
+  .quote strong { color: var(--c2); }
+
+  @media (max-width: 900px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .mg-grid, .det-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .stat-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 第7章</span></span>
+    <a class="nl" href="#s1">§7.1 追踪</a>
+    <a class="nl" href="#s2">§7.3 成本</a>
+    <a class="nl" href="#s3">§7.4 可靠性</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>ETCLOVG · O 层 · 一级架构层</div>
+  <h1>可观测性<em>与运维</em></h1>
+  <p>O层是ETCLOVG从生命周期钩子中提升为一级架构层的两层之首。智能体行为如何在生产中被监控、调试和变得可靠？从OpenTelemetry追踪到FrugalGPT的98%成本优化，从四种故障模式到"宠物变牲畜"的Managed Agents架构——这是智能体大规模运行的前提。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">OTel · Langfuse · eBPF</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">FrugalGPT 98%降本</span>
+    <span class="ltag" style="color:var(--c3);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08)">Managed Agents</span>
+    <span class="ltag" style="color:var(--muted);border-color:var(--border)">分层检测 · 38%解析错误</span>
+  </div>
+</section>
+
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§7.1</span>
+    <span class="layer-title">追踪与监控平台</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c1)">
+    基础是<strong>结构化追踪收集</strong>——将每次LLM调用、工具调用、检索步骤和上下文组装记录为可检查、过滤和重放的span树。OpenTelemetry已成为事实标准，两个开源项目将生成式AI语义约定操作化。
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title" style="color:var(--c1);">主流平台</div>
+      <ul>
+        <li><strong>Langfuse</strong>：追踪树 · 火焰图 · token分解 · 成本仪表盘</li>
+        <li><strong>Opik</strong> (Comet ML)：+ 实验跟踪</li>
+        <li><strong>Arize Phoenix</strong>：追踪 + 评估一体化</li>
+        <li><strong>MLflow</strong>：传统ML实验跟踪扩展至LLM</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--c3);">OTel 操作化</div>
+      <ul>
+        <li><strong>OpenLLMetry</strong>：LLM提供商+向量数据库自动插桩 → 标准OTel span</li>
+        <li><strong>OpenInference</strong>：OTel对齐语义约定 + Phoenix配套</li>
+        <li>追溯数据流入 <strong>Prometheus · Jaeger · Grafana · Datadog</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="sbox" style="border-top:3px solid var(--c3);">
+      <div class="sb-val" style="color:var(--c3);">&lt;3%</div>
+      <div class="sb-label"><strong>AgentSight</strong><br>eBPF系统级监控<br>CPU开销低于3%<br><em>无法被智能体绕过</em></div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--c2);">
+      <div class="sb-val" style="color:var(--c2);">3</div>
+      <div class="sb-label"><strong>AgentTrace 三表面</strong><br>认知 · 操作 · 上下文<br>认知表面捕获显式推理工件</div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--c1);">
+      <div class="sb-val" style="color:var(--c1);">4</div>
+      <div class="sb-label"><strong>主流平台</strong><br>Langfuse · Opik<br>Phoenix · MLflow</div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--c4);">
+      <div class="sb-val" style="color:var(--c4);">✓</div>
+      <div class="sb-label"><strong>OTel 标准</strong><br>生成式AI语义约定<br>模型名·温度·token·延迟</div>
+    </div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(245,158,11,.12);color:var(--c2)">§7.3</span>
+    <span class="layer-title">成本追踪与优化</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c2)">
+    单个用户任务可能触发数十次LLM调用。成本可观测性是双重的：<strong>追踪</strong>——知道token花在哪里；<strong>优化</strong>——为相同结果消耗更少token。从API到应用再到基础设施，成本控制必须跨越多层。
+  </div>
+
+  <div class="stat-row">
+    <div class="sbox" style="border-top:3px solid var(--c2);">
+      <div class="sb-val" style="color:var(--c2);">98%</div>
+      <div class="sb-label"><strong>FrugalGPT</strong><br>自适应级联路由<br>匹配GPT-4性能<br>最高98%成本降低</div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--c3);">
+      <div class="sb-val" style="color:var(--c3);">-42%</div>
+      <div class="sb-label"><strong>Dual-Pool Routing</strong><br>GPU小时减少31-42%<br>A100集群年省$286万</div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--red);">
+      <div class="sb-val" style="color:var(--red);">6pp</div>
+      <div class="sb-label"><strong>基础设施噪声</strong><br>配置偏移基准分数<br>6个百分点 (p&lt;0.01)<br>成本优化与评估交织</div>
+    </div>
+    <div class="sbox" style="border-top:3px solid var(--c1);">
+      <div class="sb-val" style="color:var(--c1);">三层</div>
+      <div class="sb-label"><strong>跨层成本追踪</strong><br>API级 · 应用级 · 基础设施级<br>Helicone · QC-Opt · Dual-Pool</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:8px;">
+    <div class="card">
+      <div class="card-title">追踪工具</div>
+      <p style="font-size:12px;line-height:1.8;color:var(--text);"><strong>TensorZero</strong>：统一LLMOps栈——网关+可观测性+实验+优化。<strong>Helicone</strong>：极简即插即用代理，零代码变更。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">优化技术栈</div>
+      <p style="font-size:12px;line-height:1.8;color:var(--text);"><strong>GPTCache</strong>：语义缓存拦截重复查询。<strong>QC-Opt</strong>：质量感知路由。<strong>TALE</strong>：token弹性悖论——预算过低反增消耗。</p>
+    </div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(244,114,182,.12);color:var(--c4)">§7.4</span>
+    <span class="layer-title">可靠性工程 <small>宠物 → 牲畜</small></span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c4)">
+    四类反复出现的故障模式、两阶段方案、Managed Agents架构——可靠性工程是长周期智能体能否在瞬态故障中存活的决定因素。<strong>每个执行环境组件都编码了一个关于模型不能独立做什么的假设，这些假设随模型改进而过时。</strong>
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title" style="color:var(--red);">四种故障模式</div>
+      <ul>
+        <li>一次性完成整个任务</li>
+        <li>过早宣布完成</li>
+        <li>会话间留下损坏状态</li>
+        <li>未经测试标记完成</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--c1);">复杂度跟踪模型能力</div>
+      <p style="font-size:12px;line-height:1.8;color:var(--text);">Opus 4.5 → 4.6升级时，移除sprint构造和上下文重置——成本从<strong style="color:var(--c2);">$200降至$125</strong>，保持输出质量。</p>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Managed Agents · 三组件解耦</div>
+  <div class="mg-grid">
+    <div class="mg-card" style="border-top:3px solid var(--c3);">
+      <div class="mg-icon">🧠</div>
+      <div class="mg-name" style="color:var(--c3);">大脑 Brain</div>
+      <div class="mg-desc">执行环境 + LLM<br>编排和推理</div>
+      <div class="mg-code">wake(sessionId)</div>
+    </div>
+    <div class="mg-card" style="border-top:3px solid var(--c2);">
+      <div class="mg-icon">🖐️</div>
+      <div class="mg-name" style="color:var(--c2);">双手 Hands</div>
+      <div class="mg-desc">沙箱 + 工具<br>执行动作</div>
+      <div class="mg-code">错误 → 自动配置新沙箱</div>
+    </div>
+    <div class="mg-card" style="border-top:3px solid var(--c1);">
+      <div class="mg-icon">📋</div>
+      <div class="mg-name" style="color:var(--c1);">会话 Session</div>
+      <div class="mg-desc">持久事件日志<br>不可变记录</div>
+      <div class="mg-code">凭证存外部保险库</div>
+    </div>
+  </div>
+
+  <div class="det-grid">
+    <div class="det-card" style="border-left:3px solid var(--c1);">
+      <div class="det-tag" style="color:var(--c1);">Layer 1</div>
+      <div class="det-name">轻量级规则检查</div>
+      <div class="det-target">确定性检查 · 结构性故障<br>格式错误 · schema违例</div>
+    </div>
+    <div class="det-card" style="border-left:3px solid var(--c2);">
+      <div class="det-tag" style="color:var(--c2);">Layer 2</div>
+      <div class="det-name">统计监控</div>
+      <div class="det-target">指标趋势分析 · 性能漂移<br>延迟 · token使用 · 成本趋势</div>
+    </div>
+    <div class="det-card" style="border-left:3px solid var(--c3);">
+      <div class="det-tag" style="color:var(--c3);">Layer 3</div>
+      <div class="det-name">LLM 语义分析</div>
+      <div class="det-target">模型判断 · 推理失败<br>幻觉 · 计划-动作错位 · 过早停止</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    <p><strong>AgentFixer</strong>在IBM CUGA生产系统上部署15个验证工具，实现64-88%问题检出率。<strong>38%的任务失败源于解析错误</strong>——完全可通过确定性检查解决。可靠性需要<strong>分层检测策略</strong>：轻量规则 → 统计监控 → LLM语义分析。</p>
+  </div>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第七章 可观测性与运维（O层 · 一级架构层）</p>
+  <p style="margin-top:6px;">追踪 · 成本 · 可靠性 — 从宠物到牲畜，智能体大规模运行的前提</p>
+</div>
+
+</div>
+</body>
+</html>

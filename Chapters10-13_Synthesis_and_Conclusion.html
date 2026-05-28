@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第10-13章 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c2: #F59E0B; --c3: #818CF8; --c4: #F472B6; --c5: #34D399;
+  }
+  .hero h1 em { background: linear-gradient(135deg, var(--c2), var(--c4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .layer-sec { scroll-margin-top: 60px; }
+  .prob-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 20px; }
+  .prob-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 12px; text-align: center; transition: all .2s;
+  }
+  .prob-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .pr-num { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .pr-title { font-size: 11px; font-weight: 700; line-height: 1.4; margin-bottom: 4px; }
+  .pr-desc { font-size: 10px; color: var(--muted); line-height: 1.5; }
+  .quote { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; font-size: 14px; line-height: 1.8; }
+  .quote strong { color: var(--c2); }
+  @media (max-width: 900px) { .prob-grid { grid-template-columns: repeat(3,1fr); } }
+  @media (max-width: 600px) { .prob-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 第10-13章</span></span>
+    <a class="nl" href="#s1">§10 跨领域</a>
+    <a class="nl" href="#s2">§11 综合</a>
+    <a class="nl" href="#s3">§12 开放问题</a>
+    <a class="nl" href="#s4">§13 结论</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>综合与展望</div>
+  <h1>跨层综合<em>与未来方向</em></h1>
+  <p>本章将七层ETCLOVG的跨领域关切整合为系统级效应——成本-质量-速度三元悖论、能力-控制权衡、执行环境耦合问题。从智能体框架到智能体平台的范式转移，再到五个开放问题：加固执行环境、维护可靠状态、从追踪诊断故障、标准化交接、随模型改进简化执行环境。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">三元悖论</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">耦合问题</span>
+    <span class="ltag" style="color:var(--c3);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08)">五个开放问题</span>
+    <span class="ltag" style="color:var(--muted);border-color:var(--border)">框架 → 平台</span>
+  </div>
+</section>
+
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§10</span>
+    <span class="layer-title">跨领域关切</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c1);">
+    生产执行环境最常在<strong>表面之间的接口处</strong>失败。七层并非独立——E约束L，C影响V，G跨越所有层。执行环境设计应被解读为依赖结构，而非可分离组件的检查清单。
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card"><div class="card-title">成本-质量-速度三元悖论</div><p style="font-size:12px;line-height:1.8;color:var(--text);">更强的评估、更严的治理、更丰富的可观测性、更忠实的执行环境→增加成本和延迟。优化速度→减少诊断深度。生产系统必须决定哪些检查同步、哪些异步、哪些故障值得昂贵恢复。</p></div>
+    <div class="card"><div class="card-title">五大持续性缺口</div><p style="font-size:12px;line-height:1.8;color:var(--text);">跨工具互操作 · 成本归因 · 故障恢复 · 多仓库编排 · 人机交接。核心问题不再是每层有无工具，而是<strong>组合后的执行环境是否作为可靠的控制系统运行</strong>。</p></div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(245,158,11,.12);color:var(--c2)">§11</span>
+    <span class="layer-title">跨层综合 · 五大系统级效应</span>
+  </div>
+
+  <div class="grid3" style="margin-bottom:16px;">
+    <div class="card"><div class="card-title" style="color:var(--c1);">三元悖论</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">更忠实的E→增加延迟和成本。更丰富的C→消耗token。更深的V/O→减慢迭代。质量不是标量目标——需决定哪些风险值得昂贵控制。</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c2);">能力-控制权衡</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">更大工具菜单→更多选择错误和注入面。持久记忆→来源和隐私风险。宽松沙箱→更大爆炸半径。不是安全附加组件——是连接T/C/L/G的设计轴。</p></div>
+    <div class="card"><div class="card-title" style="color:var(--red);">耦合问题</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">E改变评估结果，T消耗C预算，O追踪仅在捕获G状态时成为治理证据。执行环境变更应被测试为<strong>系统变更</strong>——单独有益的组件可能在组合后降低整体表现。</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c3);">框架 → 平台</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">框架打包局部抽象；平台添加持久工作区、托管沙箱、身份、计费、治理。核心问题从"如何构建一个智能体"转变为<strong>"如何运营一个智能体集群"</strong>。</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c4);">自适应控制</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">Meta-Harness：提示/工具/控制循环可作为优化目标搜索。NLAH：执行环境模块显式且可消融。目标：<strong>自适应简化</strong>——持续追问哪些控制仍然必要。</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c5);">闭合回路</div><p style="font-size:11px;line-height:1.7;color:var(--muted);">智能体分数不能干净归因于模型而不指定控制器。上下文策略/工具模式/验证器/恢复循环的变更改变了<strong>控制器CH</strong>，从而改变了同一模型的测量行为（Bölük, 2026b）。</p></div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(129,140,248,.12);color:var(--c3)">§12</span>
+    <span class="layer-title">五个开放问题</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c3);">
+    智能体执行环境正在变成长周期控制系统，但该领域在加固执行基板、保持状态、诊断故障、转移责任和随模型能力变化更新执行环境方面仍缺乏成熟答案。
+  </div>
+
+  <div class="prob-grid">
+    <div class="prob-card" style="border-top:3px solid var(--c1);"><div class="pr-num" style="color:var(--c1);">12.1</div><div class="pr-title">加固与扩展执行环境</div><div class="pr-desc">15-35%逃逸率的防御碎片化。容器/microVM/OS权限/浏览器/桌面/学习代理的成本模型。</div></div>
+    <div class="prob-card" style="border-top:3px solid var(--c2);"><div class="pr-num" style="color:var(--c2);">12.2</div><div class="pr-title">维护可靠状态</div><div class="pr-desc">每次压缩/检索/遗忘可能删除约束、扭曲优先级。将上下文管理重新定义为状态估计问题。</div></div>
+    <div class="prob-card" style="border-top:3px solid var(--c3);"><div class="pr-num" style="color:var(--c3);">12.3</div><div class="pr-title">从追踪诊断故障</div><div class="pr-desc">89%团队用可观测性，仅52.4%用离线评估。追踪原生评估——异常生产追踪→回归案例。</div></div>
+    <div class="prob-card" style="border-top:3px solid var(--c4);"><div class="pr-num" style="color:var(--c4);">12.4</div><div class="pr-title">标准化交接</div><div class="pr-desc">MCP+A2A+OTel是局部标准，缺少跨层交接契约——意图+约束+权限+工件+预算+风险+历史。</div></div>
+    <div class="prob-card" style="border-top:3px solid var(--c5);"><div class="pr-num" style="color:var(--c5);">12.5</div><div class="pr-title">随模型改进简化</div><div class="pr-desc">每个执行环境组件编码模型不能独立做什么的假设。Meta-Harness+NLAH→持续识别哪些控制仍然必要。</div></div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s4">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(244,114,182,.12);color:var(--c4)">§13</span>
+    <span class="layer-title">结论</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c4);">
+    本综述将智能体执行环境视为<strong>独立的工程表面</strong>，并论证<strong>基础设施质量——而非单纯的模型能力——设定了真实世界智能体可靠性的上限</strong>。
+  </div>
+
+  <div class="quote">
+    <p>围绕关键约束命题，我们展开了<strong>三大贡献</strong>：执行环境是关键约束（概念层），ETCLOVG七层分类法将O和G提升为一级架构层（分类层），148+开源项目映射揭示生态系统密度与缺口（实证层）。</p>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted);">分类法本身是描述性的——将ETCLOVG转化为能<strong>指导</strong>执行环境设计决策的规范性框架，是我们希望本综述能够鼓励的<strong>自然下一步</strong>。</p>
+  </div>
+
+  <table class="stab">
+    <thead><tr><th>贡献</th><th>层级</th><th>核心主张</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--c1);font-weight:700;">贡献一</td><td>概念层</td><td>执行环境是关键约束，三阶段工程演进（提示→上下文→执行环境）</td></tr>
+      <tr><td style="color:var(--c2);font-weight:700;">贡献二</td><td>分类层</td><td>ETCLOVG七层分类法：O和G作为独立一级架构层</td></tr>
+      <tr><td style="color:var(--c3);font-weight:700;">贡献三</td><td>实证层</td><td>148+开源项目映射：E/T/L/V密集，O/G薄弱，三类新发现</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第10-13章 综合与展望</p>
+  <p style="margin-top:6px;">ETCLOVG: Execution · Tooling · Context · Lifecycle · Observability · Verification · Governance</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第3章 执行环境与沙箱 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c1d: #0D9488;
+    --c2: #F59E0B; --c2d: #B45309;
+    --c3: #818CF8; --c3d: #4F46E5;
+    --c4: #F472B6; --c4d: #DB2777;
+  }
+  .hero h1 em {
+    background: linear-gradient(135deg, var(--c1), var(--c3));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .layer-sec { scroll-margin-top: 60px; }
+
+  /* Purpose triple */
+  .purpose-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+  .pcard {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px; transition: border-color .2s, transform .15s;
+  }
+  .pcard:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .pc-icon { font-size: 28px; margin-bottom: 12px; }
+  .pc-tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  .pc-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .pc-desc { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .pc-stat { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 22px; font-weight: 800; }
+
+  /* Sandbox categories */
+  .cat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 16px; }
+  .cat-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px; transition: border-color .2s, transform .15s;
+  }
+  .cat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .cat-num { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .cat-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .cat-sys { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .cat-note { margin-top: 8px; font-size: 11px; color: var(--muted); line-height: 1.5; font-style: italic; padding-left: 12px; border-left: 2px solid var(--border); }
+
+  /* Threat stat */
+  .threat-stat {
+    background: linear-gradient(135deg, rgba(248,81,73,.08), rgba(245,158,11,.06));
+    border: 1px solid rgba(248,81,73,.2); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 20px; text-align: center;
+  }
+  .threat-stat .ts-val { font-size: 42px; font-weight: 800; color: var(--red); line-height: 1.1; }
+  .threat-stat .ts-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* Deployment modes */
+  .deploy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .dpl-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px; transition: border-color .2s;
+  }
+  .dpl-card:hover { border-color: var(--border2); }
+  .dpl-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-bottom: 8px; }
+  .dpl-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .dpl-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .dpl-sys { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
+
+  .quote {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 20px; font-size: 14px; line-height: 1.8;
+  }
+  .quote strong { color: var(--c2); }
+
+  @media (max-width: 900px) {
+    .purpose-grid, .cat-grid, .deploy-grid { grid-template-columns: 1fr; }
+    .threat-stat .ts-val { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 第3章</span></span>
+    <a class="nl" href="#s1">§3.1 概念</a>
+    <a class="nl" href="#s2">§3.2 七类别</a>
+    <a class="nl" href="#s3">§3.3 威胁</a>
+    <a class="nl" href="#s4">§3.4 部署</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>ETCLOVG · E 层</div>
+  <h1>执行环境与<em>沙箱</em></h1>
+  <p>智能体的代码在哪里运行？受什么约束？E层是ETCLOVG七支柱之首——它不仅是安全边界，更是可复现评估的基石和长周期自主执行的前提。本章按七大类别审视沙箱生态，揭示15-35%逃逸率的攻防鸿沟。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">安全 · 可复现 · 活性</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">七大沙箱类别</span>
+    <span class="ltag" style="color:var(--red);border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.08)">15-35% 逃逸率</span>
+    <span class="ltag" style="color:var(--muted);border-color:var(--border)">三种部署模式</span>
+  </div>
+</section>
+
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§3.1</span>
+    <span class="layer-title">范围与概念 <small>沙箱的三重目的</small></span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c1)">
+    智能体时代的沙箱不仅是继承自传统多租户代码执行的安全措施。它同时服务于<strong>安全、可复现性和活性</strong>三个截然不同的目的——三者组合将沙箱从运维细节提升为执行环境设计中的一级架构关切。
+  </div>
+
+  <div class="purpose-grid">
+    <div class="pcard" style="border-top:3px solid var(--red);">
+      <div class="pc-tag" style="color:var(--red)">共享于传统</div>
+      <div class="pc-title">安全 Security</div>
+      <div class="pc-desc">LLM生成的代码不可大规模审计或预测；智能体跨多步自主执行，无人类实时干预；提示注入可将良性智能体转化为攻击向量——模糊可信意图与恶意输入的边界。</div>
+    </div>
+    <div class="pcard" style="border-top:3px solid var(--c2);">
+      <div class="pc-tag" style="color:var(--c2)">被智能体放大</div>
+      <div class="pc-title">可复现性 Reproducibility</div>
+      <div class="pc-desc">Docker/microVM可按需销毁重建，开发者工作站做不到。SWE-bench和OSWorld等评估标准依赖这一特性。训练时单任务需数百条并行轨迹重放——缺乏廉价复位机制本身就是扩展性瓶颈。</div>
+    </div>
+    <div class="pcard" style="border-top:3px solid var(--c1);">
+      <div class="pc-tag" style="color:var(--c1)">智能体时代全新</div>
+      <div class="pc-title">活性 Liveness</div>
+      <div class="pc-desc">沙箱定义有界区域，智能体在其中自由行动——权限从"每步都问"变为"会话级一次设定"。沙箱同时是牢笼和许可证：许可证的一面使自主长周期执行成为可能。</div>
+      <div class="pc-stat" style="color:var(--c1);">-84%<span style="font-size:12px;color:var(--muted);font-weight:400;"> 权限提示减少</span></div>
+    </div>
+  </div>
+
+  <table class="stab">
+    <thead><tr><th>目的</th><th>与传统沙箱的关系</th><th>智能体时代的特殊性</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--red);font-weight:600">安全</td><td>共享</td><td>提示注入、自主多步执行放大威胁</td></tr>
+      <tr><td style="color:var(--c2);font-weight:600">可复现性</td><td>被放大</td><td>评估和训练的规模化需求</td></tr>
+      <tr><td style="color:var(--c1);font-weight:600">活性</td><td style="color:var(--c1);font-weight:700">全新</td><td>无沙箱则长周期自主执行不可行</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(245,158,11,.12);color:var(--c2)">§3.2</span>
+    <span class="layer-title">智能体沙箱的七大类别</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c2)">
+    2024-2026年间，沙箱基础设施从少量通用运行时<strong>分化为七个截然不同的产品类别</strong>，每个针对不同任务类型优化。按工作负载和使用场景分类对执行环境设计者最具信息价值。
+  </div>
+
+  <div class="cat-grid">
+    <div class="cat-card" style="border-left:3px solid var(--c1);">
+      <div class="cat-num" style="color:var(--c1);">01</div>
+      <div class="cat-title">通用托管沙箱</div>
+      <div class="cat-sys">Daytona (&lt;90ms) · E2B (Firecracker) · Modal (gVisor) · Northflank · OpenSandbox · Docker Sandboxes</div>
+      <div class="cat-note">趋势：从共享内核容器 → 独立内核 microVM。LLM代码的不可预测syscall模式驱动这一迁移。</div>
+    </div>
+    <div class="cat-card" style="border-left:3px solid var(--c3);">
+      <div class="cat-num" style="color:var(--c3);">02</div>
+      <div class="cat-title">计算机使用智能体</div>
+      <div class="cat-sys">Anthropic Computer Use · CUA · OSWorld</div>
+      <div class="cat-note">以密度和启动延迟换取保真度——操作无API应用的<strong>唯一执行模型</strong>。需microVM/全VM级别隔离。</div>
+    </div>
+    <div class="cat-card" style="border-left:3px solid var(--c4);">
+      <div class="cat-num" style="color:var(--c4);">03</div>
+      <div class="cat-title">代码专用沙箱</div>
+      <div class="cat-sys">Judge0 · OpenAI Code Interpreter · sandboxed.sh · langchain-sandbox (Pyodide/Wasm)</div>
+      <div class="cat-note">牺牲通用性换启动速度。子趋势：容器 → WebAssembly（能力安全+微秒实例化）。</div>
+    </div>
+    <div class="cat-card" style="border-left:3px solid var(--c2);">
+      <div class="cat-num" style="color:var(--c2);">04</div>
+      <div class="cat-title">框架集成运行时</div>
+      <div class="cat-sys">OpenHands Runtime · agent-infra · smolagents executor层</div>
+      <div class="cat-note">核心权衡：bundle（开箱即用但耦合）vs compose（最小环境+外部抽象组装）。</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num" style="color:var(--muted);">05</div>
+      <div class="cat-title">浏览器评估环境</div>
+      <div class="cat-sys">WebArena · VisualWebArena · BrowserGym · WorkArena</div>
+      <div class="cat-note">双重角色：沙箱+评估执行环境。直接连接执行环境层与评估层（§8）。天然底床研究间接提示注入。</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num" style="color:var(--muted);">06</div>
+      <div class="cat-title">OS级权限沙箱</div>
+      <div class="cat-sys">Anthropic sandbox-runtime (bubblewrap) · Claude Code 沙箱 · IsolateGPT (seccomp)</div>
+      <div class="cat-note">设计哲学：权限而非分区——收窄主机视图。适用于提示注入威胁模型，非完全对抗性代码。</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-num" style="color:var(--muted);">07</div>
+      <div class="cat-title">沙箱抽象层</div>
+      <div class="cat-sys">SWE-ReX · smolagents executor接口 · K8s Agent Sandbox CRD</div>
+      <div class="cat-note">将运行什么与在哪里运行解耦——沙箱抽象正在成为执行环境栈的<strong>独立层</strong>。</div>
+    </div>
+  </div>
+
+  <div class="tran-sec" style="margin-top:24px;border-radius:10px;">
+    <div class="tran-inner" style="padding:24px;">
+      <div class="tran-h" style="font-size:16px;">三大跨类别趋势</div>
+      <div class="gate" style="margin-top:12px;">
+        <span class="gate-item gi-note" style="font-size:12px;">隔离强度两极分化：microVM vs 收窄主机视图，纯Docker被两端挤压</span>
+        <span class="gate-item gi-note" style="font-size:12px;">评估鲁棒性上升：SandboxEscapeBench/CIBER证实生产配置可被绕过</span>
+        <span class="gate-item gi-note" style="font-size:12px;">基础设施隔离 vs 语义隔离分离：§3 vs §4互补，完整执行环境需两者兼有</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(248,81,73,.12);color:var(--red)">§3.3</span>
+    <span class="layer-title">威胁模型与沙箱逃逸</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--red)">
+    智能体沙箱执行同时面临<strong>传统容器级威胁</strong>和三种智能体时代独有的攻击向量——后者从根本上挑战了传统安全模型的假设。
+  </div>
+
+  <div class="grid2" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title" style="color:var(--red)">三种智能体特异威胁</div>
+      <ul>
+        <li><strong>提示注入</strong>：外部输入劫持智能体行为——攻击面从受控用户输入扩展到所有非受控数据</li>
+        <li><strong>目标错位</strong>：智能体本身主动尝试沙箱逃逸作为工具性子目标——<em>攻击者和被攻击者是同一进程的不同意图层面</em></li>
+        <li><strong>组合放大</strong>：多工具访问权限下，单一弱点通过集成能力产生级联效应</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--c2)">防御研究（早期阶段）</div>
+      <ul>
+        <li><strong>IsolateGPT</strong>：执行隔离架构，75%查询性能开销&lt;30%，防跨应用泄露</li>
+        <li><strong>事务性沙箱</strong>：回滚保护，约14.5%开销，高风险命令高拦截率</li>
+        <li><strong>LLM-in-Sandbox</strong>：最小化沙箱能力，减少攻击面和复杂性</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="threat-stat">
+    <div class="ts-val">15% – 35%</div>
+    <div class="ts-label">SandboxEscapeBench · 前沿LLM · Docker容器逃逸成功率（取决于配置）</div>
+  </div>
+
+  <div class="quote">
+    <p><strong>攻防鸿沟</strong>：进攻性评估已产出具体且可复现的基准测试，而防御性工作仍分散在隔离原型之间。一个在统一评估方法下系统性处理提示注入、目标错位和组合放大的<strong>智能体原生运行时安全框架</strong>仍是开放研究方向（§12.1）。</p>
+  </div>
+</section>
+
+<section class="layer-sec" id="s4">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(129,140,248,.12);color:var(--c3)">§3.4</span>
+    <span class="layer-title">部署模式</span>
+  </div>
+
+  <div class="deploy-grid">
+    <div class="dpl-card" style="border-top:3px solid var(--c1);">
+      <div class="dpl-tag" style="color:var(--c1);">最低延迟</div>
+      <div class="dpl-name">自托管 Self-Hosted</div>
+      <div class="dpl-desc">开发者直接管理沙箱基础设施。最紧密迭代循环，承担全部运维负担。</div>
+      <div class="dpl-sys">OpenHands · SWE-agent 默认模式</div>
+    </div>
+    <div class="dpl-card" style="border-top:3px solid var(--c3);">
+      <div class="dpl-tag" style="color:var(--c3);">弹性扩展</div>
+      <div class="dpl-name">云 SaaS</div>
+      <div class="dpl-desc">沙箱即服务提供商处理基础设施。弹性扩展+托管安全，代价是网络往返延迟。</div>
+      <div class="dpl-sys">E2B · Modal · Daytona Cloud</div>
+    </div>
+    <div class="dpl-card" style="border-top:3px solid var(--c4);">
+      <div class="dpl-tag" style="color:var(--c4);">合规优先</div>
+      <div class="dpl-name">混合/自带云 BYOC</div>
+      <div class="dpl-desc">智能体逻辑与沙箱执行跨环境解耦。保留敏感数据本地，委托执行能力。</div>
+      <div class="dpl-sys">OpenHands SDK · E2B BYOC · Northflank BYOC</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">驱动力量一：三轴权衡</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text);">部署选择沿<strong style="color:var(--c1)">延迟</strong>、<strong style="color:var(--c3)">安全性</strong>和<strong style="color:var(--c4)">可扩展性</strong>三轴展开。自托管最低延迟但承全部运维负担；云沙箱弹性扩展但增加网络延迟；混合模式试图在数据本地性和执行容量之间取得平衡。</p>
+    </div>
+    <div class="card">
+      <div class="card-title">驱动力量二：组织约束</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text);">数据驻留、合规性和可审计性推动部署向混合架构靠拢——即使纯从延迟和可扩展性角度单一模式可能最优。<strong style="color:var(--c2)">数据治理和合规性正成为与延迟和性能同等重要的一级约束。</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第三章 执行环境与沙箱（E层）</p>
+  <p style="margin-top:6px;">安全 · 可复现 · 活性 — 三重目的将沙箱提升为一级架构关切</p>
+</div>
+
+</div>
+</body>
+</html>

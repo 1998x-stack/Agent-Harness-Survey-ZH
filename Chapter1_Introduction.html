@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第1章 引言 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c1d: #0D9488;
+    --c2: #F59E0B; --c2d: #B45309;
+    --c3: #818CF8; --c3d: #4F46E5;
+  }
+  .hero h1 em {
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  /* Evidence stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; text-align: center; transition: border-color .2s, transform .15s;
+  }
+  .stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .stat-val { font-size: 38px; font-weight: 800; letter-spacing: -.04em; line-height: 1.1; }
+  .stat-meta { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .stat-src { font-size: 11px; color: var(--faint); font-family: var(--mono); margin-top: 6px; }
+  /* Quote block */
+  .quote {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px 28px; margin-bottom: 24px; position: relative;
+  }
+  .quote::before {
+    content: '"'; position: absolute; left: 12px; top: -8px;
+    font-size: 48px; color: var(--faint); line-height: 1;
+  }
+  .quote p { font-size: 15px; line-height: 1.85; color: var(--text); padding-left: 16px; }
+  .quote p strong { color: var(--c2); }
+  /* Split comparison */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .split-col {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .split-col .sc-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 12px; padding: 2px 8px; border-radius: 4px; display: inline-block;
+  }
+  .split-col ul { padding: 0 0 0 16px; }
+  .split-col li { font-size: 13px; line-height: 1.85; list-style-type: disc; margin-bottom: 4px; }
+  .split-col li::marker { color: var(--faint); }
+  /* Contribution cards */
+  .contrib-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 24px; margin-bottom: 16px; transition: border-color .2s;
+  }
+  .contrib-card:hover { border-color: var(--border2); }
+  .contrib-card .cc-num {
+    font-size: 13px; font-weight: 700; letter-spacing: .06em; margin-bottom: 8px;
+  }
+  .contrib-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .contrib-card p { font-size: 13px; color: var(--muted); line-height: 1.8; margin-bottom: 14px; }
+  .cc-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cc-pill {
+    padding: 3px 10px; border-radius: 6px; font-size: 11px;
+    border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--mono);
+  }
+  /* Evidence banner */
+  .evidence-banner {
+    background: linear-gradient(135deg, rgba(45,212,191,.06), rgba(245,158,11,.06));
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 24px;
+    font-size: 14px; color: var(--text); line-height: 1.8;
+  }
+  .evidence-banner strong { color: var(--c2); }
+  @media (max-width: 900px) {
+    .stat-grid { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .stat-val { font-size: 28px; }
+  }
+  /* Section anchor offset for sticky nav */
+  .layer-sec { scroll-margin-top: 60px; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 综述</span></span>
+    <a class="nl" href="#s1">1.1 关键约束</a>
+    <a class="nl" href="#s2">1.2 实践鸿沟</a>
+    <a class="nl" href="#s3">1.3 范围与贡献</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>Chapter 1 · 2026年5月</div>
+  <h1><em>执行环境</em> — 智能体可靠性的关键约束</h1>
+  <p>对 LLM 智能体的学术研究长期以模型为中心。然而，近期的实证证据表明：任务执行可靠性更少取决于底层模型，更多取决于包裹它的基础设施层——智能体执行环境（agent execution harness）。本章通过三项标志性研究提出了本综述的核心框架。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">关键约束命题</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">执行环境工程</span>
+    <span class="ltag" style="color:var(--c3);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08)">ETCLOVG 七层分类法</span>
+    <span class="ltag" style="color:var(--muted);border-color:var(--border)">148+ 开源项目</span>
+  </div>
+</section>
+
+<!-- Section 1.1: The Binding Constraint -->
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§1.1</span>
+    <span class="layer-title">模型之上的关键约束</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--c1)">
+    学术研究议程长期围绕模型能力展开——能否多步规划、可靠调用工具、检索和压缩相关记忆。隐含假设：<strong>智能体能力 ≈ 模型能力</strong>。三项最新研究以确凿数据推翻了这一假设。
+  </div>
+
+  <!-- Three evidence stats -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--c1)">10×</div>
+      <div class="stat-meta">仅修改编辑工具格式和工具执行环境，<strong>未对模型做任何改动</strong>，在15个模型上报告编码基准最高10倍提升</div>
+      <div class="stat-src">Bölük (2026a)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--c2)">+13.7pp</div>
+      <div class="stat-meta">重构系统提示词、注入中间件上下文和自我验证钩子——<strong>纯基础设施改动</strong>，从52.8%提升至66.5%</div>
+      <div class="stat-src">Trivedy (2026)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" style="color:var(--c3)">76.4%</div>
+      <div class="stat-meta">自动化执行环境优化超越所有手工方案，<strong>未修改模型权重</strong>，在Terminal-Bench-2上达到新高度</div>
+      <div class="stat-src">Meta-Harness · Lee et al. (2026)</div>
+    </div>
+  </div>
+
+  <!-- Key insight quote -->
+  <div class="quote">
+    <p>在每一个案例中，<strong>变量是执行环境（execution harness）</strong>——即管理上下文构建、工具交互、编排调度、反馈机制和执行约束的基础设施层；而模型保持不变。这些仅通过改进执行环境获得的性能增益，超过了同一基准上典型模型进步所报告的2-4个百分点。这一模式并非偶然：<strong>是执行环境，而非模型本身，在驱动最终结果。</strong></p>
+  </div>
+
+  <div class="evidence-banner">
+    我们将这一模式称为<strong>关键约束命题（binding-constraint thesis）</strong>：对于在可比前沿模型上评估的长周期任务，基准测试的方差可能由执行环境和模型本身共同驱动，且前者的影响可能大于后者。§2中的图3从历史视角展示了同样的转变——早期系统将能力集中在单一模型循环中，而后期系统越来越揭示出可靠性本质上是一个<strong>跨层基础设施问题</strong>。
+  </div>
+
+  <div class="grid2" style="margin-top:20px;">
+    <div class="card">
+      <div class="card-title">传统假设</div>
+      <ul>
+        <li>智能体能力 = 模型能力</li>
+        <li>更好的模型 → 更可靠的智能体</li>
+        <li>提示工程足以驱动行为</li>
+        <li>模型进步 = 2-4pp 基准提升</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">关键约束命题</div>
+      <ul>
+        <li>智能体能力 = <strong>执行环境 × 模型</strong></li>
+        <li>执行环境改进 → 最高10倍增益</li>
+        <li>基础设施是可靠性的一阶决定因素</li>
+        <li>纯执行环境优化：+13.7pp → 76.4%</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Transition -->
+<div class="tran-sec">
+  <div class="tran-inner">
+    <span class="tran-pill" style="background:rgba(245,158,11,.12);color:var(--c2)">从模型中心到执行环境中心</span>
+    <div class="tran-h">三项独立研究，一个共同结论</div>
+    <div class="tran-p">Bölük修改了工具格式，Trivedy重构了系统提示和中间件，Meta-Harness自动化了执行环境优化——三者在不同维度上指向同一事实：执行环境的质量决定了智能体可靠性的上限。</div>
+  </div>
+</div>
+
+<!-- Section 1.2: Practitioner–Research Gap -->
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(245,158,11,.12);color:var(--c2)">§1.2</span>
+    <span class="layer-title">实践者与研究的鸿沟</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--c2)">
+    一个令人瞩目的张力：<strong>工业实践者对执行环境的重视程度远超学术研究的覆盖范围</strong>。多家头部机构已从不同角度独立验证了执行环境工程的核心地位。
+  </div>
+
+  <!-- Industry evidence cards -->
+  <div class="grid3" style="margin-bottom:20px;">
+    <div class="card">
+      <div class="card-title">OpenAI · 2026年2月</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text);">
+        正式将<strong style="color:var(--c1)">"执行环境工程"</strong>确立为独立学科，定义为围绕Codex智能体设计环境、约束、文档和反馈循环的工程实践。小团队五个月内产出约<strong style="color:var(--c2)">一百万行代码</strong>，未手动编写任何生产代码。
+      </p>
+      <div class="cc-meta" style="margin-top:10px;"><span class="cc-pill">OpenAI (2026a)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Anthropic · 工程原则</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text);">
+        智能体应采用<strong>简单且可审查</strong>的架构，工具接口应<strong>面向智能体</strong>而非人类设计，上下文应<strong>渐进式披露</strong>，长周期任务需要持久化的交接工件和可恢复的执行基础设施。
+      </p>
+      <div class="cc-meta" style="margin-top:10px;"><span class="cc-pill">Anthropic (2024a–2026b)</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Martin Fowler 网站</div>
+      <p style="font-size:13px;line-height:1.8;color:var(--text);">
+        将执行环境工程定义为<strong style="color:var(--c3)">"AI智能体的控制论治理器"</strong>，由前馈指导器和反馈传感器构成，在LLM周围形成控制回路。
+      </p>
+      <div class="cc-meta" style="margin-top:10px;"><span class="cc-pill">Böckeler (2026)</span></div>
+    </div>
+  </div>
+
+  <!-- The gap - split view -->
+  <div class="split">
+    <div class="split-col">
+      <span class="sc-tag" style="background:rgba(45,212,191,.12);color:var(--c1)">工业界</span>
+      <ul>
+        <li>知道执行环境基础设施至关重要</li>
+        <li>已产出百万行代码的生产系统</li>
+        <li>提炼了可操作的工程原则</li>
+        <li>沙箱化减少84%权限提示（Anthropic）</li>
+      </ul>
+    </div>
+    <div class="split-col">
+      <span class="sc-tag" style="background:rgba(248,81,73,.12);color:var(--red)">学术界</span>
+      <ul>
+        <li>以日益增长的精度研究各组件——记忆、工具使用、规划、安全</li>
+        <li>缺少对<strong>将这些组件整合为可靠系统的系统本身</strong>的系统性研究</li>
+        <li>缺乏描述<strong>为什么</strong>执行环境关键的形式化词汇</li>
+        <li>缺少推动系统性改进的概念框架</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="quote" style="margin-top:8px;">
+    <p>本综述的目标正是<strong>桥接这一鸿沟</strong>——将工业界积累的实践智慧转化为学术研究可操作的研究议程。实践者知道执行环境重要，但缺乏形式化词汇来描述为什么；研究者拥有方法论的严谨性，但缺少将系统集成视为一级研究对象的视角。</p>
+  </div>
+</section>
+
+<!-- Transition -->
+<div class="tran-sec">
+  <div class="tran-inner">
+    <span class="tran-pill" style="background:rgba(129,140,248,.12);color:var(--c3)">三大核心贡献</span>
+    <div class="tran-h">概念层 · 分类层 · 实证层</div>
+    <div class="tran-p">本综述围绕三个核心主张组织：执行环境是真实世界智能体可靠性的关键约束（概念），ETCLOVG七层分类法将可观测性和治理提升为一级架构层（分类），148+开源项目映射揭示生态系统密度与缺口（实证）。</div>
+  </div>
+</div>
+
+<!-- Section 1.3: Scope and Contributions -->
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(129,140,248,.12);color:var(--c3)">§1.3</span>
+    <span class="layer-title">范围与贡献</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--c3)">
+    本综述聚焦于<strong>包装语言模型以管理长周期、多步任务执行的基础设施层</strong>。我们不将智能体框架作为开发工具调研，不将智能体平台作为产品类别分析，不对模型能力本身进行评测——尽管三者都会为分析提供信息和参考。
+  </div>
+
+  <!-- Contribution 1 -->
+  <div class="contrib-card" style="border-left:3px solid var(--c1);">
+    <div class="cc-num" style="color:var(--c1)">贡献一 · 概念层</div>
+    <h3>执行环境是真实世界智能体可靠性的关键约束</h3>
+    <p>基于关键约束命题（Bölük, 2026b），我们认为<strong>执行环境——而非模型本身——是真实世界智能体可靠性的关键约束</strong>。近期三项研究表明：仅通过执行环境改进即可实现最高10倍增益、+13.7个百分点提升、以及76.4%的自动化优化结果——每一项都超过同一基准上典型模型驱动改进的幅度。</p>
+    <div class="cc-meta">
+      <span class="cc-pill" style="color:var(--c1);border-color:rgba(45,212,191,.3);">§2 三阶段工程演进</span>
+      <span class="cc-pill" style="color:var(--c2);border-color:rgba(245,158,11,.3);">§11 跨层综合</span>
+      <span class="cc-pill" style="color:var(--c3);border-color:rgba(129,140,248,.3);">§12 开放问题议程</span>
+    </div>
+  </div>
+
+  <!-- Contribution 2 -->
+  <div class="contrib-card" style="border-left:3px solid var(--c2);">
+    <div class="cc-num" style="color:var(--c2)">贡献二 · 分类层</div>
+    <h3>ETCLOVG 七层分类法</h3>
+    <p>提出<strong>ETCLOVG七层分类法</strong>，将<strong>可观测性（O）和治理（G）</strong>作为独立的一级架构层，而非生命周期钩子的附属功能。这两层在工业生产环境中各有其独立的工具栈——可观测性侧有Langfuse和OpenTelemetry，治理侧有权限引擎、网关和审计管线——且由不同团队负责。状态管理被置于生命周期与编排层（L）中，与读写状态的执行流程相邻。</p>
+    <div class="cc-meta">
+      <span class="cc-pill">E: Execution</span><span class="cc-pill">T: Tooling</span><span class="cc-pill">C: Context</span><span class="cc-pill">L: Lifecycle</span>
+      <span class="cc-pill" style="color:var(--c2);border-color:rgba(245,158,11,.3);">O: Observability</span>
+      <span class="cc-pill">V: Verification</span>
+      <span class="cc-pill" style="color:var(--c3);border-color:rgba(129,140,248,.3);">G: Governance</span>
+    </div>
+  </div>
+
+  <!-- Contribution 3 -->
+  <div class="contrib-card" style="border-left:3px solid var(--c3);">
+    <div class="cc-num" style="color:var(--c3)">贡献三 · 实证层</div>
+    <h3>148+ 开源项目的生态系统映射</h3>
+    <p>将超过148个开源项目映射到ETCLOVG分类法中，<strong>展示了生态系统在哪里密集、在哪里薄弱、以及早期语料库遗漏了哪些类别</strong>——这是目前规模最大的开源智能体执行环境语料库。<strong>密集区域</strong>：执行环境（E）、工具接口（T）、生命周期（L）、验证（V）；<strong>薄弱区域</strong>：可观测性（O）和治理（G）；<strong>新发现类别</strong>：任务运行器、多智能体编排器、规范驱动开发工具。</p>
+    <div class="cc-meta">
+      <span class="cc-pill" style="color:var(--c1);border-color:rgba(45,212,191,.3);">E · T · L · V 密集</span>
+      <span class="cc-pill" style="color:var(--c2);border-color:rgba(245,158,11,.3);">O · G 薄弱</span>
+      <span class="cc-pill">§2.4–§2.9 可复现方法</span>
+    </div>
+  </div>
+
+  <!-- Summary table -->
+  <table class="stab" style="margin-top:24px;">
+    <thead>
+      <tr><th>贡献</th><th>层级</th><th>核心主张</th><th>支撑章节</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="color:var(--c1);font-weight:700">贡献一</td>
+        <td>概念层</td>
+        <td>执行环境是关键约束，10×增益远超模型驱动改进</td>
+        <td><span class="pill" style="color:var(--c1);border-color:rgba(45,212,191,.3)">§2</span> <span class="pill" style="color:var(--c2);border-color:rgba(245,158,11,.3)">§11</span> <span class="pill" style="color:var(--c3);border-color:rgba(129,140,248,.3)">§12</span></td>
+      </tr>
+      <tr>
+        <td style="color:var(--c2);font-weight:700">贡献二</td>
+        <td>分类层</td>
+        <td>ETCLOVG七层分类法：O和G作为一级架构层</td>
+        <td><span class="pill">§2.3</span> <span class="pill">§3–§9</span></td>
+      </tr>
+      <tr>
+        <td style="color:var(--c3);font-weight:700">贡献三</td>
+        <td>实证层</td>
+        <td>148+开源项目映射：密集区域、薄弱区域、新发现类别</td>
+        <td><span class="pill">§2.4–§2.9</span> <span class="pill">§A</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- Footer -->
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第一章 引言</p>
+  <p style="margin-top:6px;">ETCLOVG: Execution · Tooling · Context · Lifecycle · Observability · Verification · Governance</p>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="智能体执行环境工程综述 — 中文交互版。ETCLOVG七层分类法，170+开源项目映射，从提示工程到执行环境工程的三阶段演进。">
+<title>Agent Harness Engineering — 智能体执行环境工程综述</title>
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --border: rgba(255,255,255,.08); --border2: rgba(255,255,255,.18);
+    --text: #e6edf3; --muted: #7d8590; --faint: #3d444d;
+    --c1: #2DD4BF; --c2: #F59E0B; --c3: #818CF8; --c4: #F472B6; --c5: #34D399; --c7: #A78BFA;
+    --red: #f85149;
+    --font: system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --mono: 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.65}
+  a{color:inherit;text-decoration:none}
+
+  nav{
+    position:sticky;top:0;z-index:100;
+    background:rgba(13,17,23,.94);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;height:52px;font-size:13px;
+  }
+  .nav-inner{max-width:1160px;width:100%;margin:0 auto;padding:0 40px;display:flex;align-items:center;gap:6px;height:100%}
+  .nav-brand{font-weight:600;font-size:14px;color:var(--text);margin-right:20px;white-space:nowrap}
+  .nav-brand span{color:var(--muted);font-weight:400}
+  nav a.nl{padding:4px 10px;border-radius:6px;color:var(--muted);transition:all .15s}
+  nav a.nl:hover{color:var(--text);background:var(--bg3)}
+
+  .page{max-width:1160px;margin:0 auto;padding:0 40px}
+
+  .hero{padding:80px 0 48px;border-bottom:1px solid var(--border);text-align:center}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--bg3);border:1px solid var(--border2);font-size:12px;color:var(--muted);margin-bottom:20px}
+  .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--c5)}
+  .hero h1{font-size:44px;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-bottom:12px}
+  .hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero .sub{font-size:18px;color:var(--muted);margin-bottom:8px}
+  .hero p{font-size:15px;color:var(--muted);max-width:640px;margin:0 auto 28px;line-height:1.8}
+  .hero a.cta{display:inline-block;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;background:var(--c1);color:#0d1117;transition:all .2s}
+  .hero a.cta:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(45,212,191,.3)}
+
+  .meta-row{display:flex;justify-content:center;gap:24px;margin-top:8px;flex-wrap:wrap}
+  .meta-item{font-size:12px;color:var(--faint);display:flex;align-items:center;gap:4px}
+  .meta-item strong{color:var(--muted);font-weight:500}
+
+  /* Chapter grid */
+  .ch-sec{padding:56px 0}
+  .ch-sec h2{font-size:22px;font-weight:700;margin-bottom:24px;text-align:center}
+  .ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .ch-card{
+    background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+    padding:18px 20px;transition:all .2s;display:flex;gap:14px;align-items:flex-start;
+  }
+  .ch-card:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-2px)}
+  .ch-card .ch-num{font-size:20px;font-weight:800;flex-shrink:0;width:36px;text-align:center}
+  .ch-card .ch-body{flex:1}
+  .ch-card .ch-title{font-size:14px;font-weight:700;margin-bottom:2px}
+  .ch-card .ch-en{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:4px}
+  .ch-card .ch-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+  /* ETCLOVG */
+  .etclovg{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:20px 0}
+  .etclovg span{padding:6px 12px;border-radius:6px;font-size:13px;font-weight:700;font-family:var(--mono);border:1px solid}
+
+  .footer{text-align:center;padding:40px 0;font-size:12px;color:var(--faint);border-top:1px solid var(--border);margin-top:40px}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .ch-sec{animation:fadeUp .4s ease both}
+
+  @media(max-width:900px){.ch-grid{grid-template-columns:1fr}.page,.nav-inner{padding:0 20px}.hero h1{font-size:32px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 中文综述</span></span>
+    <a class="nl" href="#chapters">章节导航</a>
+    <a class="nl" href="#etclovg">ETCLOVG</a>
+    <a class="nl" href="https://github.com/1998x-stack/Agent-Harness-Survey-ZH" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>2026 · 学术综述 · 中文交互版</div>
+  <div class="sub">Agent Harness Engineering: A Survey</div>
+  <h1>智能体<em>执行环境工程</em>综述</h1>
+  <p>本综述将智能体执行环境视为独立的工程表面，论证基础设施质量——而非单纯的模型能力——设定了真实世界智能体可靠性的上限。ETCLOVG七层分类法，170+开源项目映射，从提示工程到执行环境工程的三阶段演进。</p>
+  <a class="cta" href="#chapters">开始阅读 →</a>
+  <div class="meta-row">
+    <span class="meta-item">作者：<strong>Junjie Li, Xi Xiao, Yunbei Zhang 等</strong></span>
+    <span class="meta-item">机构：<strong>CMU · Yale · JHU · NEU · Tulane · UAB · OSU · Virginia Tech · Amazon</strong></span>
+    <span class="meta-item">页面：<strong>71页 · 13章</strong></span>
+    <span class="meta-item">项目：<strong>170+ 开源项目语料库</strong></span>
+  </div>
+</section>
+
+<section class="ch-sec" id="etclovg">
+  <h2>ETCLOVG 七层分类法</h2>
+  <div class="etclovg">
+    <span style="color:var(--c1);border-color:rgba(45,212,191,.25);background:rgba(45,212,191,.06)">E · 执行环境</span>
+    <span style="color:#FB923C;border-color:rgba(251,146,60,.25);background:rgba(251,146,60,.06)">T · 工具接口</span>
+    <span style="color:var(--c2);border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.06)">C · 上下文</span>
+    <span style="color:var(--c3);border-color:rgba(129,140,248,.25);background:rgba(129,140,248,.06)">L · 生命周期</span>
+    <span style="color:var(--c4);border-color:rgba(244,114,182,.25);background:rgba(244,114,182,.06)">O · 可观测性</span>
+    <span style="color:var(--c5);border-color:rgba(52,211,153,.25);background:rgba(52,211,153,.06)">V · 验证</span>
+    <span style="color:var(--c7);border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.06)">G · 治理</span>
+  </div>
+  <p style="text-align:center;font-size:13px;color:var(--muted);">前四层为结构核心（E·T·C·L），后三层为控制平面（O·V·G）。O和G从生命周期钩子中提升为一级架构层。</p>
+</section>
+
+<section class="ch-sec" id="chapters">
+  <h2>章节导航</h2>
+  <div class="ch-grid">
+    <a class="ch-card" href="Chapter1_Introduction.html"><span class="ch-num" style="color:var(--c1)">01</span><div class="ch-body"><div class="ch-title">引言</div><div class="ch-en">Introduction</div><div class="ch-desc">关键约束命题 · 执行环境而非模型驱动可靠性 · 10倍增益 · 实践者-研究鸿沟</div></div></a>
+    <a class="ch-card" href="Chapter2_Background_and_Taxonomy.html"><span class="ch-num" style="color:var(--c3)">02</span><div class="ch-body"><div class="ch-title">背景与分类法</div><div class="ch-en">Background & Taxonomy</div><div class="ch-desc">ReAct→工具集成→执行环境转折 · 三阶段工程演进 · ETCLOVG七层定义</div></div></a>
+    <a class="ch-card" href="Chapter3_Execution_Environment.html"><span class="ch-num" style="color:var(--c1)">03</span><div class="ch-body"><div class="ch-title">执行环境与沙箱 (E)</div><div class="ch-en">Execution Environment & Sandbox</div><div class="ch-desc">安全·可复现·活性三重目的 · 七大沙箱类别 · 15-35%逃逸率 · 三种部署模式</div></div></a>
+    <a class="ch-card" href="Chapter4_Tool_Interface_and_Protocol.html"><span class="ch-num" style="color:#FB923C">04</span><div class="ch-body"><div class="ch-title">工具接口与协议层 (T)</div><div class="ch-en">Tool Interface & Protocol</div><div class="ch-desc">四集成边界 · MCP/A2A/Function Calling · "少而精"原则 · 工具能力四要素公式</div></div></a>
+    <a class="ch-card" href="Chapter5_Context_and_Memory_Management.html"><span class="ch-num" style="color:var(--c2)">05</span><div class="ch-body"><div class="ch-title">上下文与记忆管理 (C)</div><div class="ch-en">Context & Memory Management</div><div class="ch-desc">平方代价·U形曲线·上下文腐烂 · KV缓存$0.30 vs $3.00 · Mem0 14M下载</div></div></a>
+    <a class="ch-card" href="Chapter6_Lifecycle_and_Orchestration.html"><span class="ch-num" style="color:var(--c3)">06</span><div class="ch-body"><div class="ch-title">生命周期与编排 (L)</div><div class="ch-en">Lifecycle & Orchestration</div><div class="ch-desc">ReAct范式 · 五大编排模式 · 单循环→多智能体→完整管线 · 人类掌舵智能体执行</div></div></a>
+    <a class="ch-card" href="Chapter7_Observability_and_Operations.html"><span class="ch-num" style="color:var(--c4)">07</span><div class="ch-body"><div class="ch-title">可观测性与运维 (O)</div><div class="ch-en">Observability & Operations</div><div class="ch-desc">OTel·eBPF · FrugalGPT 98%降本 · Managed Agents 宠物→牲畜 · 分层检测</div></div></a>
+    <a class="ch-card" href="Chapter8_Verification_and_Evaluation.html"><span class="ch-num" style="color:var(--c5)">08</span><div class="ch-body"><div class="ch-title">验证与评估 (V)</div><div class="ch-en">Verification & Evaluation</div><div class="ch-desc">五阶段生命周期 · 三层判断（结果/轨迹/评估器） · 跨层故障归因</div></div></a>
+    <a class="ch-card" href="Chapter9_Governance_and_Security.html"><span class="ch-num" style="color:var(--c7)">09</span><div class="ch-body"><div class="ch-title">治理与安全 (G)</div><div class="ch-en">Governance & Security</div><div class="ch-desc">四钩子H1-H4 · 51攻击/60防御 · 0/6完整防御 · 声明式宪法 · 审计管线</div></div></a>
+    <a class="ch-card" href="Chapters10-13_Synthesis_and_Conclusion.html"><span class="ch-num" style="color:var(--c4)">10-13</span><div class="ch-body"><div class="ch-title">综合与展望</div><div class="ch-en">Synthesis & Conclusion</div><div class="ch-desc">三元悖论·耦合问题·框架→平台 · 五个开放问题 · 自适应简化 · 三大贡献总结</div></div></a>
+  </div>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 中文交互版</p>
+  <p style="margin-top:6px">ETCLOVG: Execution · Tooling · Context · Lifecycle · Observability · Verification · Governance</p>
+  <p style="margin-top:4px"><a href="https://github.com/1998x-stack/Agent-Harness-Survey-ZH" style="color:var(--c1)">github.com/1998x-stack/Agent-Harness-Survey-ZH</a></p>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第5章 上下文与记忆管理 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c1d: #0D9488;
+    --c2: #F59E0B; --c2d: #B45309;
+    --c3: #818CF8; --c3d: #4F46E5;
+    --c4: #F472B6; --c4d: #DB2777;
+    --c5: #34D399; --c5d: #059669;
+  }
+  .hero h1 em { background: linear-gradient(135deg, var(--c1), var(--c3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .layer-sec { scroll-margin-top: 60px; }
+
+  /* Cost stat */
+  .cost-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+  .cost-stat {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; text-align: center; transition: border-color .2s;
+  }
+  .cost-stat:hover { border-color: var(--border2); }
+  .cs-val { font-size: 36px; font-weight: 800; line-height: 1.1; }
+  .cs-label { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+
+  /* KV rules */
+  .kv-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+  .kv-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; transition: border-color .2s, transform .15s;
+  }
+  .kv-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .kv-num { font-size: 14px; font-weight: 800; margin-bottom: 6px; }
+  .kv-rule { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .kv-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* Memory systems */
+  .mem-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 16px; }
+  .mem-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; transition: border-color .2s;
+  }
+  .mem-card:hover { border-color: var(--border2); }
+  .mem-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mem-meta { font-size: 10px; font-family: var(--mono); color: var(--muted); margin-bottom: 8px; }
+  .mem-desc { font-size: 11px; color: var(--muted); line-height: 1.7; }
+
+  /* Timeline tiers */
+  .tier-row { display: flex; gap: 0; margin-bottom: 24px; }
+  .tier-card {
+    flex: 1; background: var(--bg2); border: 1px solid var(--border);
+    padding: 16px; transition: all .2s;
+  }
+  .tier-card:first-child { border-radius: 10px 0 0 10px; }
+  .tier-card:last-child { border-radius: 0 10px 10px 0; }
+  .tier-card:hover { border-color: var(--border2); background: var(--bg3); transform: translateY(-2px); }
+  .tc-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-bottom: 6px; }
+  .tc-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .tc-tech { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  .quote {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px 24px; margin-bottom: 20px; font-size: 14px; line-height: 1.8;
+  }
+  .quote strong { color: var(--c2); }
+
+  @media (max-width: 900px) {
+    .cost-grid, .kv-grid { grid-template-columns: 1fr; }
+    .mem-grid { grid-template-columns: 1fr; }
+    .tier-row { flex-direction: column; }
+    .tier-card:first-child { border-radius: 10px 10px 0 0; }
+    .tier-card:last-child { border-radius: 0 0 10px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 第5章</span></span>
+    <a class="nl" href="#s1">§5.1 为何工程化</a>
+    <a class="nl" href="#s2">§5.3 短期管理</a>
+    <a class="nl" href="#s3">§5.5 长期记忆</a>
+    <a class="nl" href="#s4">§5.7 上下文漂移</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>ETCLOVG · C 层</div>
+  <h1>上下文与<em>记忆管理</em></h1>
+  <p>在每个步骤给模型恰好正确的信息，不多不少——这是C层的核心工程问题。更大的上下文窗口并不能解决记忆问题：计算随长度呈平方级增长，信息放置位置与存在本身同等重要。本章按时间跨度组织——短期窗口管理、中期会话持久化、长期记忆系统——以及最难的未解难题：上下文漂移。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">短期 · KV缓存 $0.30 vs $3.00</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">中期 · 文件规划 · 跨运行注入</span>
+    <span class="ltag" style="color:var(--c3);border-color:rgba(129,140,248,.3);background:rgba(129,140,248,.08)">长期 · Mem0 14M下载</span>
+    <span class="ltag" style="color:var(--red);border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.08)">上下文漂移</span>
+  </div>
+</section>
+
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§5.1</span>
+    <span class="layer-title">为何上下文必须被工程化 <small>三个架构级原因</small></span>
+  </div>
+
+  <div class="cost-grid">
+    <div class="cost-stat" style="border-top:3px solid var(--red);">
+      <div class="cs-val" style="color:var(--red);">n²</div>
+      <div class="cs-label"><strong>平方级注意力代价</strong><br>翻倍上下文 = 四倍计算和内存。FlashAttention降低常数因子，但平方结构是架构固有的。上下文窗口是稀缺资源。</div>
+    </div>
+    <div class="cost-stat" style="border-top:3px solid var(--c2);">
+      <div class="cs-val" style="color:var(--c2);">-30%</div>
+      <div class="cs-label"><strong>U形注意力曲线</strong><br>相关信息在上下文中间时，准确率比置于开头或末尾下降超过30%。跨越模型、任务和上下文长度成立。</div>
+    </div>
+    <div class="cost-stat" style="border-top:3px solid var(--c3);">
+      <div class="cs-val" style="color:var(--c3);">50K</div>
+      <div class="cs-label"><strong>上下文腐烂</strong><br>额定200K token的模型在50K时即显示显著性能损失。18个前沿模型无一例外——语义模糊查询退化更严重。</div>
+    </div>
+  </div>
+
+  <div class="quote">
+    <p>上下文管理<strong>不能是事后补救</strong>。关于包含什么、放在哪里、何时移除的每一个决策，都直接关系到智能体的可靠性。信息<strong>放置位置与信息存在本身同等重要</strong>——检索到正确内容但位置放错的智能体，从检索中几乎无收益。</p>
+  </div>
+</section>
+
+<div class="tran-sec">
+  <div class="tran-inner">
+    <span class="tran-pill" style="background:rgba(45,212,191,.12);color:var(--c1)">三层时间跨度</span>
+    <div class="tran-h">短期 · 中期 · 长期 — 映射到OS经典记忆层次</div>
+    <div class="tran-p">上下文工程按时间跨度组织为三层架构：活跃上下文窗口（短期）、会话状态持久化（中期）、跨会话可检索存储（长期）——直接映射到操作系统的寄存器→内存→磁盘层次。</div>
+  </div>
+</div>
+
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§5.3</span>
+    <span class="layer-title">短期：管理活跃上下文窗口</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--c1)">
+    短期上下文管理对模型行为影响最直接，做错时代价最高。核心技术包括<strong>系统提示校准、Token高效工具设计、渐进式披露和KV缓存感知设计</strong>。
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">系统提示校准</div>
+      <p style="font-size:12px;line-height:1.8;color:var(--text);">
+        有效提示被组织为背景、指令、工具指导和输出格式等清晰划分的部分。工作流：最小提示 → 实证识别失败模式 → 定向添加指令。<strong>预先枚举边界情况膨胀提示而不提高可靠性。</strong>
+      </p>
+    </div>
+    <div class="card">
+      <div class="card-title">渐进式披露</div>
+      <p style="font-size:12px;line-height:1.8;color:var(--text);">
+        不预加载所有潜在信息——维护轻量级标识符（文件路径、查询、链接），按需加载。镜像人类专家：构建外部索引系统，按需检索。Claude Code：CLAUDE.md启动加载 + glob/grep按需导航。
+      </p>
+    </div>
+  </div>
+
+  <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">KV缓存 — 生产阶段最重要的单一指标</div>
+  
+  <div class="kv-grid">
+    <div class="kv-card" style="border-top:3px solid var(--c1);">
+      <div class="kv-num" style="color:var(--c1);">规则 1</div>
+      <div class="kv-rule">保持提示前缀稳定</div>
+      <div class="kv-desc">系统提示开头的<strong>单个token差异</strong>使后续所有内容的缓存失效</div>
+    </div>
+    <div class="kv-card" style="border-top:3px solid var(--c2);">
+      <div class="kv-num" style="color:var(--c2);">规则 2</div>
+      <div class="kv-rule">将上下文视为仅追加</div>
+      <div class="kv-desc">修改过去的动作或观察通过创建不同前缀序列<strong>破坏缓存复用</strong></div>
+    </div>
+    <div class="kv-card" style="border-top:3px solid var(--c3);">
+      <div class="kv-num" style="color:var(--c3);">规则 3</div>
+      <div class="kv-rule">使用确定性序列化</div>
+      <div class="kv-desc">JSON中不稳定的键排序<strong>无声地使相同请求的缓存失效</strong></div>
+    </div>
+  </div>
+
+  <div class="cost-grid" style="margin-top:8px;">
+    <div class="cost-stat" style="border-top:3px solid var(--c1);"><div class="cs-val" style="color:var(--c1);">$0.30</div><div class="cs-label">缓存 token 成本<br><span style="font-family:var(--mono);font-size:11px;">Claude Sonnet / MTok</span></div></div>
+    <div class="cost-stat" style="border-top:3px solid var(--red);"><div class="cs-val" style="color:var(--red);">$3.00</div><div class="cs-label">未缓存 token 成本<br><span style="font-family:var(--mono);font-size:11px;">Claude Sonnet / MTok</span></div></div>
+    <div class="cost-stat" style="border-top:3px solid var(--c3);"><div class="cs-val" style="color:var(--c3);">10×</div><div class="cs-label">成本差异<br><span style="font-size:11px;">Manus Team (2025) · 五轮架构迭代</span></div></div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(129,140,248,.12);color:var(--c3)">§5.5</span>
+    <span class="layer-title">长期：持久化记忆系统</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--c3)">
+    长期记忆系统提供跨会话、任务和智能体实例的<strong>可索引、可检索存储</strong>——支持任意召回，无论记忆创建于何时。基础架构建立了理论框架，生产系统已大规模部署。
+  </div>
+
+  <div class="mem-grid" style="margin-bottom:16px;">
+    <div class="mem-card" style="border-left:3px solid var(--c1);">
+      <div class="mem-name" style="color:var(--c1);">MemGPT</div>
+      <div class="mem-meta">Packer et al., 2023 · 基础架构</div>
+      <div class="mem-desc">将LLM上下文窗口视为RAM，外部存储视为磁盘——<strong>透明的记忆管理为LLM提供更长上下文的假象</strong>。首次显式建立智能体记忆与OS记忆的联系。</div>
+    </div>
+    <div class="mem-card" style="border-left:3px solid var(--c2);">
+      <div class="mem-name" style="color:var(--c2);">Generative Agents</div>
+      <div class="mem-meta">Park et al., 2023 · 标准模板</div>
+      <div class="mem-desc"><strong>观察-反思-检索三元组</strong>：Memory Stream存储观察+时间戳+重要性评分。消融实验：三个组件各自独立贡献行为质量。至今仍是标准模板。</div>
+    </div>
+    <div class="mem-card" style="border-left:3px solid var(--c3);">
+      <div class="mem-name" style="color:var(--c3);">Mem0</div>
+      <div class="mem-meta">Chhikara et al., 2025 · 14M下载 · 41K★</div>
+      <div class="mem-desc"><strong>部署最广的生产长期记忆层</strong>。向量DB+图DB+KV存储。LOCOMO基准准确率高26%，token仅为全上下文方法的10%。AWS于2025年选为Agent SDK独家记忆提供商。</div>
+    </div>
+    <div class="mem-card" style="border-left:3px solid var(--c4);">
+      <div class="mem-name" style="color:var(--c4);">A-MEM</div>
+      <div class="mem-meta">Xu et al., 2025 · 动态知识网络</div>
+      <div class="mem-desc">Zettelkasten启发——新记忆生成结构化笔记，<strong>回溯更新已有笔记</strong>。解决根本局限：记忆相关性在写入时可能不明显，只能在后见中体现。</div>
+    </div>
+    <div class="mem-card" style="border-left:3px solid var(--c5);">
+      <div class="mem-name" style="color:var(--c5);">Hindsight · Honcho</div>
+      <div class="mem-meta">Vectorize.io · Plastic Labs · 2025</div>
+      <div class="mem-desc"><strong>Hindsight</strong>：retain/recall/reflect API，LongMemEval SOTA。<strong>Honcho</strong>：构建用户模型而非事实存储——后台异步"梦想"推理管线。</div>
+    </div>
+    <div class="mem-card" style="border-left:3px solid var(--c2);">
+      <div class="mem-name" style="color:var(--c2);">cq · Mozilla AI</div>
+      <div class="mem-meta">Mozilla AI, 2025 · 集体记忆</div>
+      <div class="mem-desc">填补<strong>跨智能体实例共享记忆</strong>的空白。MCP原生，三级运作：本地→组织共享→跨团队。错误后钩子模式：遇到错误自动查询集体知识库。</div>
+    </div>
+  </div>
+
+  <div class="tier-row">
+    <div class="tier-card" style="border-left:3px solid var(--c1);"><div class="tc-tag" style="color:var(--c1);">模式A</div><div class="tc-title">单体上下文</div><div class="tc-tech">纯上下文窗口内的记忆管理</div></div>
+    <div class="tier-card" style="border-left:3px solid var(--c2);"><div class="tc-tag" style="color:var(--c2);">模式B</div><div class="tc-title">窗口 + 检索存储</div><div class="tc-tech">上下文窗口 + 外部检索增强</div></div>
+    <div class="tier-card" style="border-left:3px solid var(--c3);"><div class="tc-tag" style="color:var(--c3);">模式C</div><div class="tc-title">分层记忆 + 学习控制</div><div class="tc-tech">带学习控制策略的分层记忆系统</div></div>
+  </div>
+  <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:-16px;">Du (2026) · 三维分类法：记忆范围 × 存储格式 × 组合结构</p>
+</section>
+
+<section class="layer-sec" id="s4">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(248,81,73,.12);color:var(--red)">§5.7</span>
+    <span class="layer-title">上下文漂移与当前方法的局限</span>
+  </div>
+
+  <div class="layer-def" style="border-color:var(--red)">
+    前述所有技术都在不同程度和条件下有效。<strong>但没有一种解决了根本问题。</strong>上下文漂移——智能体行为在扩展交互中的渐进退化——仍然是C层中最难解决的开放挑战。
+  </div>
+
+  <div class="grid3" style="margin-bottom:20px;">
+    <div class="card"><div class="card-title" style="color:var(--c1);">模型侧</div><p style="font-size:12px;line-height:1.7;color:var(--text);">U形注意力、上下文腐烂——即使模型容量足够，信息定位和使用仍不可靠</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c2);">执行环境侧</div><p style="font-size:12px;line-height:1.7;color:var(--text);">压缩、检索、隔离各有取舍，没有统一的最优策略</p></div>
+    <div class="card"><div class="card-title" style="color:var(--c3);">系统侧</div><p style="font-size:12px;line-height:1.7;color:var(--text);">三层记忆协调仍是手动的、启发式的，缺乏自动化上下文健康监测</p></div>
+  </div>
+
+  <div class="quote">
+    <p><strong>关键约束视角</strong>：上下文漂移是控制器侧的失败模式（Bölük, 2026b）。模型只能看到执行环境暴露的状态投影——任务相关上下文的丢失或扭曲是<strong>执行环境的属性</strong>，而非仅仅是模型的属性。解决它需要模型、执行环境和编排策略的协同进化（§12）。</p>
+  </div>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第五章 上下文与记忆管理（C层）</p>
+  <p style="margin-top:6px;">短期窗口 · 中期持久化 · 长期检索 — 上下文工程是执行环境的属性</p>
+</div>
+
+</div>
+</body>
+</html>

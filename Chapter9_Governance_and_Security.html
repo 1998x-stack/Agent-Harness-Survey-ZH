@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第9章 治理与安全 — 智能体执行环境工程</title>
+<link rel="stylesheet" href="assets/base-dark.css">
+<style>
+  :root {
+    --c1: #2DD4BF; --c2: #F59E0B; --c3: #818CF8; --c4: #F472B6; --c5: #34D399; --c7: #A78BFA;
+  }
+  .hero h1 em { background: linear-gradient(135deg, var(--c7), var(--c4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .layer-sec { scroll-margin-top: 60px; }
+
+  .hook-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+  .hk-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; text-align: center; transition: all .2s;
+  }
+  .hk-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .hk-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-bottom: 4px; }
+  .hk-name { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .hk-desc { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+  .mech-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+  .mcard {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; transition: border-color .2s;
+  }
+  .mcard:hover { border-color: var(--border2); }
+  .mc-num { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+  .mc-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mc-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  .stat-big { text-align: center; padding: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+  .sb-num { font-size: 36px; font-weight: 800; }
+  .sb-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .quote { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; font-size: 14px; line-height: 1.8; }
+  .quote strong { color: var(--c2); }
+
+  @media (max-width: 900px) {
+    .hook-grid, .mech-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .hook-grid, .mech-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">Agent Harness Engineering <span>· 第9章</span></span>
+    <a class="nl" href="#s1">§9.1 权限</a>
+    <a class="nl" href="#s2">§9.2 钩子</a>
+    <a class="nl" href="#s3">§9.3-9.5</a>
+    <a class="nl" href="#s4">§9.6-9.7</a>
+  </div>
+</nav>
+
+<div class="page">
+
+<section class="hero">
+  <div class="hero-badge"><span class="dot"></span>ETCLOVG · G 层 · 一级架构层</div>
+  <h1>治理<em>与安全</em></h1>
+  <p>G层是ETCLOVG七支柱之末——智能体行为应如何被约束、保障安全和追究责任？从权限模型到四钩子生命周期，从组件加固到声明式宪法，从审计基础设施到51种攻击/60种防御的威胁全景。六个真实系统中没有一个完全实现了所有防御类别。</p>
+  <div class="tag-row">
+    <span class="ltag" style="color:var(--c1);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.08)">权限模型 · Progent</span>
+    <span class="ltag" style="color:var(--c2);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08)">四钩子 H1-H4</span>
+    <span class="ltag" style="color:var(--c7);border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.08)">声明式宪法</span>
+    <span class="ltag" style="color:var(--red);border-color:rgba(248,81,73,.3);background:rgba(248,81,73,.08)">51攻击 · 60防御</span>
+  </div>
+</section>
+
+<section class="layer-sec" id="s1">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(45,212,191,.12);color:var(--c1)">§9.1</span>
+    <span class="layer-title">权限模型与身份管理</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c1);">
+    第一个治理问题：智能体可以触及哪些工具、文件、网络端点和系统资源？沿<strong>粒度轴</strong>展开——静态边界→上下文依赖→跨边界认证委托→Web级权限协调。
+  </div>
+
+  <div class="mech-grid">
+    <div class="mcard" style="border-left:3px solid var(--c1);"><div class="mc-num" style="color:var(--c1);">静态</div><div class="mc-title">Codex · Gemini CLI</div><div class="mc-desc">预定义权限范围+命令允许/拒绝列表。易于检查，但无法表达任务特定意图。</div></div>
+    <div class="mcard" style="border-left:3px solid var(--c2);"><div class="mc-num" style="color:var(--c2);">上下文</div><div class="mc-title">Progent · Conseca</div><div class="mc-desc">DSL谓词覆盖工具名/参数/环境状态。策略生成与执行分离——生成适应任务，执行保持可审计。</div></div>
+    <div class="mcard" style="border-left:3px solid var(--c3);"><div class="mc-num" style="color:var(--c3);">身份</div><div class="mc-title">SAGA · IsolateGPT</div><div class="mc-desc">密码学一次性密钥+短期访问token。中心-辐条架构——跨应用数据交换成为显式治理决策。</div></div>
+    <div class="mcard" style="border-left:3px solid var(--c4);"><div class="mc-num" style="color:var(--c4);">凭据</div><div class="mc-title">Skyvern 模式</div><div class="mc-desc">密钥存储于保险库，仅向LLM暴露占位符。长周期会话的密钥生命周期管理仍是开放问题。</div></div>
+    <div class="mcard" style="border-left:3px solid var(--c5);"><div class="mc-num" style="color:var(--c5);">委托</div><div class="mc-title">OAuth扩展</div><div class="mc-desc">User ID Token + Agent ID Token + Delegation Token——从人类责任者到智能体动作的可验证问责链。</div></div>
+    <div class="mcard" style="border-left:3px solid var(--c7);"><div class="mc-num" style="color:var(--c7);">Web级</div><div class="mc-title">agent-permissions.json</div><div class="mc-desc">类似robots.txt的轻量级清单——声明可用UI元素、速率限制、需人类确认的动作。治理开始跨越组织边界。</div></div>
+  </div>
+</section>
+
+<section class="layer-sec" id="s2">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(245,158,11,.12);color:var(--c2)">§9.2</span>
+    <span class="layer-title">生命周期钩子 · 四钩子模型</span>
+  </div>
+  <div class="layer-def" style="border-color:var(--c2);">
+    权限模型定义了什么被允许，钩子定义了<strong>策略检查何时触发</strong>。四个钩子点沿一次工具使用周期分布——允许在不修改核心推理的情况下注入治理逻辑。
+  </div>
+
+  <div class="hook-grid">
+    <div class="hk-card" style="border-top:3px solid var(--c1);">
+      <div class="hk-tag" style="color:var(--c1);">H1 · 输入护栏</div>
+      <div class="hk-name">输入 → LLM 之前</div>
+      <div class="hk-desc">PromptShield · DataSentinel<br>检测提示注入<br>规则严格但脆弱 · 模型泛化好但慢</div>
+    </div>
+    <div class="hk-card" style="border-top:3px solid var(--c2);">
+      <div class="hk-tag" style="color:var(--c2);">H2 · 动作验证</div>
+      <div class="hk-name">LLM → 工具 之前</div>
+      <div class="hk-desc">ShieldAgent · ControlValve<br>安全约束形式化为可验证谓词<br>防控制流劫持攻击</div>
+    </div>
+    <div class="hk-card" style="border-top:3px solid var(--c3);">
+      <div class="hk-tag" style="color:var(--c3);">H3 · 信息流控制</div>
+      <div class="hk-name">工具 → 上下文 返回前</div>
+      <div class="hk-desc">CaMeL · 污点追踪<br>区分可信输入 vs 不可信检索<br>不可信数据不能影响控制流</div>
+    </div>
+    <div class="hk-card" style="border-top:3px solid var(--c4);">
+      <div class="hk-tag" style="color:var(--c4);">H4 · 人机协同</div>
+      <div class="hk-name">敏感动作执行前</div>
+      <div class="hk-desc">仅17%用户注意权限对话框<br>仅3%正确理解授予的权限<br>习惯化和理解风险需警惕</div>
+    </div>
+  </div>
+
+  <div class="quote"><p><strong>AgentSpec</strong>定义规则（触发器+谓词+执行动作），<strong>AgentDoG</strong>转向轨迹级诊断。钩子API仍异构——缺乏广泛采纳的通用标准——且<strong>堆叠钩子的交互效应几乎未被研究</strong>。</p></div>
+</section>
+
+<section class="layer-sec" id="s3">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(167,139,250,.12);color:var(--c7)">§9.3-§9.5</span>
+    <span class="layer-title">组件加固 · 声明式宪法 · 审计</span>
+  </div>
+
+  <div class="grid3" style="margin-bottom:16px;">
+    <div class="card"><div class="card-title" style="color:var(--c1);">组件加固 §9.3</div>
+      <p style="font-size:11px;line-height:1.7;color:var(--muted);"><strong>指令层级</strong>：模型优先处理系统提示。<strong>Llama Guard</strong>：独立分类器跨LLM后端复用。<strong>ETDI</strong>：密码学签名工具定义防rug-pull。<strong>slopsquatting</strong>：<strong style="color:var(--red);">21.7%</strong>幻觉包名可被恶意注册。</p>
+    </div>
+    <div class="card"><div class="card-title" style="color:var(--c7);">声明式宪法 §9.4</div>
+      <p style="font-size:11px;line-height:1.7;color:var(--muted);">训练时宪法（Anthropic四层优先级：安全>伦理>合规>有用性）vs 部署时YAML（AutoHarness三管线：核心/标准/增强）。YAML可版本化、diff-reviewable——非开发者可审查策略。</p>
+    </div>
+    <div class="card"><div class="card-title" style="color:var(--c4);">审计基础设施 §9.5</div>
+      <p style="font-size:11px;line-height:1.7;color:var(--muted);">AutoHarness JSONL逐工具调用记录。逐动作检测（廉价）vs 轨迹级检测（捕获多步攻击）。分层管线：核心→标准→增强。缺乏标准化审计schema。</p>
+    </div>
+  </div>
+
+  <div class="stat-big"><div class="sb-num"><span style="color:var(--red);">0</span> / 6</div><div class="sb-label">六个真实系统中<strong>没有一个</strong>完全实现所有防御类别<br>信息流控制、身份管理和形式验证在所有受调查系统中<strong>完全缺失</strong>（Kim et al., 2026）</div></div>
+</section>
+
+<section class="layer-sec" id="s4">
+  <div class="layer-hdr">
+    <span class="layer-id-badge" style="background:rgba(244,114,182,.12);color:var(--c4)">§9.6-§9.7</span>
+    <span class="layer-title">安全格局 · 研究方向</span>
+  </div>
+
+  <div class="grid2" style="margin-bottom:16px;">
+    <div class="card"><div class="card-title">威胁全景</div><p style="font-size:12px;line-height:1.8;color:var(--text);">Kim et al.编码<strong style="color:var(--red);">51种攻击方法、60种防御方法</strong>，跨七个设计维度。Chen et al.综合50篇论文，六维分类法。治理机制映射到七风险类别（R1-R7）。</p></div>
+    <div class="card"><div class="card-title">八项研究方向</div><p style="font-size:12px;line-height:1.8;color:var(--text);">标准化策略语言 · 形式化治理保证 · 自适应治理 · 成本-效用权衡 · 跨组织协议 · 对抗鲁棒性 · 治理演进 · <strong>人的因素</strong>——仅3%用户正确理解授予的权限。</p></div>
+  </div>
+
+  <div class="quote"><p><strong>上下文安全</strong>（Kim et al.提议的第四安全目标）：上下文必须被视为受治理状态，而非被动的提示材料。Conseca和CaMeL展示了工程方向——是否应提升为独立安全目标尚无定论。纵深防御分层互补，但<strong>协调不善的层可能相互干扰</strong>，独立治理钩子的可组合性仍基本未被测试。</p></div>
+</section>
+
+<div class="footer">
+  <p>Agent Harness Engineering: A Survey · 第九章 治理与安全（G层 · 一级架构层）</p>
+  <p style="margin-top:6px;">权限 · 钩子 · 加固 · 宪法 · 审计 — 零系统完整防御，治理是安全部署的实践瓶颈</p>
+</div>
+
+</div>
+</body>
+</html>

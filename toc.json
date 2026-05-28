@@ -1,0 +1,90 @@
+{
+  "title": "Agent Harness Engineering: A Survey",
+  "toc": [
+    {"section": "1", "title": "Introduction", "page": 4, "children": [
+      {"section": "1.1", "title": "The Binding Constraint: Harness over Model", "page": 4},
+      {"section": "1.2", "title": "The Practitioner–Research Gap", "page": 4},
+      {"section": "1.3", "title": "Scope and Contributions", "page": 4}
+    ]},
+    {"section": "2", "title": "Background and Taxonomy", "page": 5, "children": [
+      {"section": "2.1", "title": "Evolution of Agent Systems", "page": 5},
+      {"section": "2.2", "title": "Three Engineering Phases", "page": 6},
+      {"section": "2.3", "title": "The ETCLOVG Seven-Layer Taxonomy", "page": 7},
+      {"section": "2.4", "title": "Scope", "page": 9},
+      {"section": "2.5", "title": "Project Collection Procedure", "page": 9},
+      {"section": "2.6", "title": "Inclusion and Exclusion Criteria", "page": 10},
+      {"section": "2.7", "title": "Coding Protocol", "page": 10},
+      {"section": "2.8", "title": "Limitations of the Corpus", "page": 10},
+      {"section": "2.9", "title": "Aggregate Analysis", "page": 10}
+    ]},
+    {"section": "3", "title": "Execution Environment and Sandbox (E)", "page": 11, "children": [
+      {"section": "3.1", "title": "Scope and Concepts", "page": 11},
+      {"section": "3.2", "title": "Categories of Agent Sandboxes", "page": 12},
+      {"section": "3.3", "title": "Threat Model and Sandbox Escape", "page": 15},
+      {"section": "3.4", "title": "Deployment Modes", "page": 15},
+      {"section": "3.5", "title": "Summary", "page": 16}
+    ]},
+    {"section": "4", "title": "Tool Interface and Protocol Layer (T)", "page": 16, "children": [
+      {"section": "4.1", "title": "Protocol and Interface Standards", "page": 17},
+      {"section": "4.2", "title": "Tool Description, Discovery, and Selection", "page": 17},
+      {"section": "4.3", "title": "Tool-Augmented Training and Integration", "page": 18},
+      {"section": "4.4", "title": "Scalability and Session Management", "page": 18}
+    ]},
+    {"section": "5", "title": "Context and Memory Management (C)", "page": 18, "children": [
+      {"section": "5.1", "title": "Why Context Must Be Engineered", "page": 19},
+      {"section": "5.2", "title": "From Prompt Engineering to Context Engineering", "page": 20},
+      {"section": "5.3", "title": "Short-Term: Managing the Active Context Window", "page": 20},
+      {"section": "5.4", "title": "Mid-Term: Session State and Cross-Run Persistence", "page": 21},
+      {"section": "5.5", "title": "Long-Term: Persistent Memory Systems", "page": 22},
+      {"section": "5.6", "title": "Long-Horizon Techniques: Keeping Agents Coherent Over 100+ Turns", "page": 24},
+      {"section": "5.7", "title": "Context Drift and the Limits of Current Approaches", "page": 24}
+    ]},
+    {"section": "6", "title": "Lifecycle and Orchestration (L)", "page": 25, "children": [
+      {"section": "6.1", "title": "Lifecycle State Management", "page": 26},
+      {"section": "6.2", "title": "Single-Agent Inner Loop", "page": 27},
+      {"section": "6.3", "title": "Multi-Agent Orchestration Patterns", "page": 27},
+      {"section": "6.4", "title": "Full Lifecycle Pipeline from Issue to Pull Request", "page": 27}
+    ]},
+    {"section": "7", "title": "Observability and Operations (O)", "page": 28, "children": [
+      {"section": "7.1", "title": "Tracing and Monitoring Platforms", "page": 28},
+      {"section": "7.2", "title": "Agent-Specific Operations Platforms", "page": 29},
+      {"section": "7.3", "title": "Cost Tracking and Optimization", "page": 30},
+      {"section": "7.4", "title": "Reliability Engineering", "page": 30},
+      {"section": "7.5", "title": "Discussion: Toward Unified Observability", "page": 31}
+    ]},
+    {"section": "8", "title": "Verification and Evaluation (V)", "page": 32, "children": [
+      {"section": "8.1", "title": "Harness Evaluation as a Task-to-Feedback Lifecycle", "page": 32},
+      {"section": "8.2", "title": "Stage 1: Task and Benchmark Grounding", "page": 33},
+      {"section": "8.3", "title": "Stage 2: Pre-execution Readiness Validation", "page": 34},
+      {"section": "8.4", "title": "Stage 3: Controlled Execution and Trace Capture", "page": 35},
+      {"section": "8.5", "title": "Stage 4: Multi-level Judgement and Failure Attribution", "page": 36},
+      {"section": "8.6", "title": "Stage 5: Continuous Regression and Deployment Feedback", "page": 38},
+      {"section": "8.7", "title": "Summary", "page": 39}
+    ]},
+    {"section": "9", "title": "Governance and Security (G)", "page": 39, "children": [
+      {"section": "9.1", "title": "Permission Models and Identity Management", "page": 39},
+      {"section": "9.2", "title": "Lifecycle Hooks", "page": 41},
+      {"section": "9.3", "title": "Component Hardening", "page": 42},
+      {"section": "9.4", "title": "Declarative Constitutions", "page": 43},
+      {"section": "9.5", "title": "Audit Infrastructure", "page": 44},
+      {"section": "9.6", "title": "Situating Governance in the Agent Security Landscape", "page": 45},
+      {"section": "9.7", "title": "Research Directions", "page": 46}
+    ]},
+    {"section": "10", "title": "Cross-Cutting Concerns", "page": 47, "children": []},
+    {"section": "11", "title": "Cross-Layer Synthesis", "page": 48, "children": [
+      {"section": "11.1", "title": "Cost-Quality-Speed Trilemma", "page": 48},
+      {"section": "11.2", "title": "Capability-Control Tradeoff", "page": 48},
+      {"section": "11.3", "title": "Harness Coupling Problem", "page": 48},
+      {"section": "11.4", "title": "From Agent Frameworks to Agent Platforms", "page": 48},
+      {"section": "11.5", "title": "Open Research Agenda", "page": 49}
+    ]},
+    {"section": "12", "title": "Open Problems and Future Directions", "page": 49, "children": [
+      {"section": "12.1", "title": "Hardening and Scaling Execution Environments", "page": 49},
+      {"section": "12.2", "title": "Maintaining Reliable State in Long-Running Agents", "page": 49},
+      {"section": "12.3", "title": "Diagnosing Failures from Agent Traces", "page": 50},
+      {"section": "12.4", "title": "Standard Handoffs Across Agents, Tools, and Humans", "page": 50},
+      {"section": "12.5", "title": "Keeping Harnesses Useful as Models Improve", "page": 51}
+    ]},
+    {"section": "13", "title": "Conclusion", "page": 51, "children": []}
+  ]
+}
