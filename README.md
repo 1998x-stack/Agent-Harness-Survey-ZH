@@ -2,8 +2,9 @@
 
 > 智能体执行环境工程综述 · 中文精译 · 交互式HTML
 
-[![Pages](https://img.shields.io/badge/Pages-10%20HTML-blue)](./)
-[![Chapters](https://img.shields.io/badge/Chapters-13-green)](./)
+[![HTML](https://img.shields.io/badge/HTML-11%20pages-blue)](./assets/)
+[![Markdown](https://img.shields.io/badge/Markdown-61%20files-green)](./)
+[![Chapters](https://img.shields.io/badge/Chapters-13-orange)](./)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](./LICENSE)
 
 ## 关于本综述
@@ -34,20 +35,20 @@
 
 ## 在线阅读
 
-**[→ 打开 index.html](./index.html)** 或直接浏览各章节：
+**[→ 打开中文交互版综述](assets/index.html)**
 
-| 章节 | 文件 |
-|------|------|
-| 01 · 引言 | [Chapter1_Introduction.html](./Chapter1_Introduction.html) |
-| 02 · 背景与分类法 | [Chapter2_Background_and_Taxonomy.html](./Chapter2_Background_and_Taxonomy.html) |
-| 03 · 执行环境与沙箱 (E) | [Chapter3_Execution_Environment.html](./Chapter3_Execution_Environment.html) |
-| 04 · 工具接口与协议层 (T) | [Chapter4_Tool_Interface_and_Protocol.html](./Chapter4_Tool_Interface_and_Protocol.html) |
-| 05 · 上下文与记忆管理 (C) | [Chapter5_Context_and_Memory_Management.html](./Chapter5_Context_and_Memory_Management.html) |
-| 06 · 生命周期与编排 (L) | [Chapter6_Lifecycle_and_Orchestration.html](./Chapter6_Lifecycle_and_Orchestration.html) |
-| 07 · 可观测性与运维 (O) | [Chapter7_Observability_and_Operations.html](./Chapter7_Observability_and_Operations.html) |
-| 08 · 验证与评估 (V) | [Chapter8_Verification_and_Evaluation.html](./Chapter8_Verification_and_Evaluation.html) |
-| 09 · 治理与安全 (G) | [Chapter9_Governance_and_Security.html](./Chapter9_Governance_and_Security.html) |
-| 10-13 · 综合与展望 | [Chapters10-13_Synthesis_and_Conclusion.html](./Chapters10-13_Synthesis_and_Conclusion.html) |
+| 章节 | HTML | Markdown 源文件 |
+|------|------|----------------|
+| 01 · 引言 | [HTML](assets/Chapter1_Introduction.html) | [4个md](01_Introduction/) — 引言 · 关键约束 · 实践鸿沟 · 范围与贡献 |
+| 02 · 背景与分类法 | [HTML](assets/Chapter2_Background_and_Taxonomy.html) | [10个md](02_Background_and_Taxonomy/) — 演进 · 三阶段 · ETCLOVG · 范围 · 收集 · 编码 · 聚合 |
+| 03 · 执行环境与沙箱 (E) | [HTML](assets/Chapter3_Execution_Environment.html) | [5个md](03_Execution_Environment_and_Sandbox/) — 概念 · 七类别 · 威胁 · 部署 |
+| 04 · 工具接口与协议层 (T) | [HTML](assets/Chapter4_Tool_Interface_and_Protocol.html) | [5个md](04_Tool_Interface_and_Protocol/) — 协议标准 · 工具发现 · 增强训练 · 会话管理 |
+| 05 · 上下文与记忆管理 (C) | [HTML](assets/Chapter5_Context_and_Memory_Management.html) | [8个md](05_Context_and_Memory_Management/) — 为何工程化 · 提示→上下文 · 短期 · 中期 · 长期 · 长周期 · 漂移 |
+| 06 · 生命周期与编排 (L) | [HTML](assets/Chapter6_Lifecycle_and_Orchestration.html) | [5个md](06_Lifecycle_and_Orchestration/) — 状态管理 · 单循环 · 多智能体 · Issue→PR |
+| 07 · 可观测性与运维 (O) | [HTML](assets/Chapter7_Observability_and_Operations.html) | [6个md](07_Observability_and_Operations/) — 追踪平台 · 专用平台 · 成本优化 · 可靠性 · 统一观测 |
+| 08 · 验证与评估 (V) | [HTML](assets/Chapter8_Verification_and_Evaluation.html) | [6个md](08_Verification_and_Evaluation/) — 五阶段 · 基准接地 · 就绪验证 · 追踪捕获 · 多层判断 · 回归反馈 |
+| 09 · 治理与安全 (G) | [HTML](assets/Chapter9_Governance_and_Security.html) | [8个md](09_Governance_and_Security/) — 权限 · 钩子 · 加固 · 宪法 · 审计 · 安全格局 · 研究方向 |
+| 10-13 · 综合与展望 | [HTML](assets/Chapters10-13_Synthesis_and_Conclusion.html) | [4个md](10_Cross_Cutting_Concerns/) — 跨领域 · 跨层综合 · 开放问题 · 结论 |
 
 ## 关键数据一览
 
@@ -65,29 +66,34 @@
 
 ```
 .
-├── index.html                         ← 首页导航
-├── Chapter1-9_*.html                  ← 第1-9章 HTML
-├── Chapters10-13_*.html               ← 第10-13章 HTML（综合）
+├── index.html                                   ← 根目录跳转页 → assets/
+├── README.md                                    ← 项目文档
+├── abstract.txt                                 ← 论文摘要
+├── toc.json                                     ← 目录 JSON
 ├── assets/
-│   └── base-dark.css                  ← 深色主题设计系统
-├── 01_Introduction/                   ← 第1章 Markdown 源文件 (4 files)
-├── 02_Background_and_Taxonomy/        ← 第2章 (10 files)
-├── 03_Execution_Environment_and_Sandbox/ ← 第3章 (5 files)
-├── 04_Tool_Interface_and_Protocol/    ← 第4章 (5 files)
-├── 05_Context_and_Memory_Management/  ← 第5章 (8 files)
-├── 06_Lifecycle_and_Orchestration/    ← 第6章 (5 files)
-├── 07_Observability_and_Operations/   ← 第7章 (6 files)
-├── 08_Verification_and_Evaluation/    ← 第8章 (6 files)
-├── 09_Governance_and_Security/        ← 第9章 (8 files)
-├── 10_Cross_Cutting_Concerns/         ← 第10章 (1 file)
-├── 11_Cross_Layer_Synthesis/          ← 第11章 (1 file)
-├── 12_Open_Problems_and_Future_Directions/ ← 第12章 (1 file)
-├── 13_Conclusion/                     ← 第13章 (1 file)
-├── abstract.txt                       ← 论文摘要
-└── toc.json                           ← 目录 JSON
+│   ├── index.html                               ← 首页导航（ETCLOVG概览 + 章节卡片）
+│   ├── Chapter1_Introduction.html               ← 01 · 引言
+│   ├── Chapter2_Background_and_Taxonomy.html    ← 02 · 背景与分类法
+│   ├── Chapter3_Execution_Environment.html      ← 03 · 执行环境与沙箱 (E)
+│   ├── Chapter4_Tool_Interface_and_Protocol.html← 04 · 工具接口与协议层 (T)
+│   ├── Chapter5_Context_and_Memory_Management.html ← 05 · 上下文与记忆管理 (C)
+│   ├── Chapter6_Lifecycle_and_Orchestration.html← 06 · 生命周期与编排 (L)
+│   ├── Chapter7_Observability_and_Operations.html← 07 · 可观测性与运维 (O)
+│   ├── Chapter8_Verification_and_Evaluation.html← 08 · 验证与评估 (V)
+│   ├── Chapter9_Governance_and_Security.html    ← 09 · 治理与安全 (G)
+│   ├── Chapters10-13_Synthesis_and_Conclusion.html ← 10-13 · 综合与展望
+│   └── base-dark.css                            ← 深色主题设计系统
+├── 01_Introduction/  (4 md)    ├── 06_Lifecycle_and_Orchestration/  (5 md)
+├── 02_Background_and_Taxonomy/ (10 md) ├── 07_Observability_and_Operations/ (6 md)
+├── 03_Execution_Environment_and_Sandbox/ (5 md) ├── 08_Verification_and_Evaluation/ (6 md)
+├── 04_Tool_Interface_and_Protocol/ (5 md)  ├── 09_Governance_and_Security/ (8 md)
+├── 05_Context_and_Memory_Management/ (8 md) ├── 10_Cross_Cutting_Concerns/ (1 md)
+│                                           ├── 11_Cross_Layer_Synthesis/ (1 md)
+│                                           ├── 12_Open_Problems_and_Future_Directions/ (1 md)
+│                                           └── 13_Conclusion/ (1 md)
 ```
 
-总计：**61 个 Markdown 源文件 + 10 个 HTML 页面 + 1 个设计系统 CSS**
+总计：**11 个 HTML 页面 + 61 个 Markdown 源文件 + 1 个设计系统 CSS**
 
 ## 致谢
 
